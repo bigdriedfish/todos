@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>todo</title>
+	<style>
+		a:link,a:visited {
+ 			color: #000000;
+ 			text-decoration: none;
+		}
+		a:hover {
+ 			color: #999999;
+ 			text-decoration: none;
+		}
+		#todos>li input[type="text"]{
+			display:none;
+		}
+		#todos>li.editing span{
+			display:none;
+		}
+		#todos>li.editing input[type="text"]{
+			display:inline-block;
+		}
+		#todos>li.completed {
+			text-decoration: line-through;
+			color:#999999;
+		}
+		main>#todos>li:not(.completed)+.footer>button {
+			display: none;
+		}
+		#todos.active li.completed {
+			display: none;
+		}
+		#todos.completed li:not(.completed) {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<section>
+		<h1>todos</h1>
+		<input type="checkbox" id="toggle-all">
+		<input type="text" placeholder="What needs to be done?" class="todo-input">
+		<main>
+			<ul id="todos">
+			</ul>
+		</main>
+		<footer class="footer">
+			<span>
+				<span class="todo-count">
+					0
+				</span>
+				items left
+			</span>
+			<ul class="domain">
+				<li><a href="javascript:" name="all">All</a></li>
+				<li><a href="javascript:" name="active">Active</a></li>
+				<li><a href="javascript:" name="completed">Completed</a></li>
+			</ul>
+			<button id="clear">Clear completed</button>
+		</footer>
+	</section>
+</body>
+<script>
+	var todoInput = document.querySelector('.todo-input')
+	var todos	= document.querySelector('#todos')
+	var todoCount = document.querySelector('.todo-count')
+	var toggleAll = document.querySelector('#toggle-all')
+	var domain = document.querySelector('.domain')
+	var clear = document.querySelector('#clear')
+	var footer = document.querySelector('.footer')
+
+
+	function countNumbers(){
+		var checkboxes = todos.querySelectorAll('input[type="checkbox"]')
+	  var c = Array.from(checkboxes).filter(it => !it.checked).length
+		todoCount.textContent = c 
+		if (c === 0) {
+			toggleAll.checked = true
+		} else {
+			toggleAll.checked = false
+		}
+		if (c === checkboxes.length) {
+			clear.style.display = 'none'
+		} else {
+			clear.style.display = 'inline-block'
+		}
+	}
+	//itemsleft计数
+	
+	toggleAll.addEventListener('change', function(){
+		if (toggleAll.checked === true) {
+			Array.from(todos.querySelectorAll('input[type="checkbox"]')).filter(it => !it.checked).forEach(it => it.click())
+		} else {
+			Array.from(todos.querySelectorAll('input[type="checkbox"]')).filter(it => it.checked).forEach(it => !it.click())
+		}
+		//老师的办法
+	})
+	//toggle全选
+
+	todoInput.addEventListener('keyup', function(e){
+		var todoInputContent = e.target.value.replace(/(^\s*)|(\s*$)/g,'')
+		//去除字段首尾空格
+		var inputContent = todoInputContent
+	
+		if(e.keyCode===13 && e.target.value) {
+			e.target.value = ''
+			//输入框输入结束时清空
+			var li = document.createElement('li')
+			var check = document.createElement('input')
+			check.type = 'checkbox'
+			check.addEventListener('change', function(){
+				if (check.checked === true) {
+					li.classList.add('completed')
+				}	else {
+					li.classList.remove('completed')
+				}
+				countNumbers()
+			})
+
+			var edit = document.createElement('input')
+			edit.type = 'text'
+			edit.value = inputContent
+			edit.addEventListener('blur', function(e){
+				li.classList.remove('editing')
+				span.textContent = e.target.value
+			})
+			edit.addEventListener('keyup',function(e){
+				this.blur()
+			})
+			
+
+			var span = document.createElement('span')
+			span.textContent = inputContent
+			span.addEventListener('dblclick',function(){
+				li.classList.add('editing')
+				edit.focus()
+			})
+			
+
+			var x = document.createElement('a')
+			x.href = 'javascript:'
+			x.textContent = '×'
+			x.addEventListener('click', function() {
+				x.parentNode.parentNode.removeChild(x.parentNode)
+			})
+
+			document.getElementById('todos').appendChild(li)
+			li.appendChild(check)
+			li.appendChild(document.createTextNode(' '))
+			li.appendChild(edit)
+			li.appendChild(document.createTextNode(' '))
+			li.appendChild(span)
+			li.appendChild(document.createTextNode(' '))
+			li.appendChild(x)	
+
+			countNumbers()
+
+			// toggleAll.addEventListener('change',function(){
+			// 	if (toggleAll.checked === true) {
+			// 		li.classList.add('completed')
+			// 		check.checked =true
+			// 	} else {
+			// 		li.classList.remove('completed')
+			// 		check.checked = false
+			// 	}
+			// 	countNumbers()
+			// })   我自己的办法
+			
+		}
+	}) 
+	//结束内容添加修改等等
+	
+	domain.addEventListener('click', function(e){
+		var domains = e.target.name
+		//console.log(domains)
+		todos.className = domains
+	})
+	//底部三个标签点击显示
+	
+	clear.addEventListener('click', function(){
+		document.querySelectorAll('li.completed a').forEach(it => it.click())
+		countNumbers()
+	})
+	//clear按钮删除
+	// clear.addEventListener('click', function(){
+	// 	var done = Array.from(todos.getElementsByClassName('completed'))
+	// 	for(let v of done) {
+	// 		//debugger;console.log(v)
+	// 		todos.removeChild(v)
+	// 	}
+	// 	countNumbers()
+	// }) 自己的方法
+</script>
+</html>
